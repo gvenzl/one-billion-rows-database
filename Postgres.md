@@ -18,7 +18,7 @@ ALTER SYSTEM SET autovacuum_max_workers=128;
 
 ```sql
 ALTER SYSTEM SET shared_buffers='300GB';
-ALTER SYSTEM SET work_mem='10GB';
+ALTER SYSTEM SET work_mem='1GB';
 exit;
 ```
 
@@ -51,6 +51,7 @@ CREATE SCHEMA AUTHORIZATION obrc;
 GRANT ALL PRIVILEGES ON DATABASE obrc TO obrc;
 GRANT USAGE ON FOREIGN SERVER csv_data TO obrc;
 GRANT pg_read_server_files TO obrc;
+CREATE TABLESPACE obrc_ramfs_ts OWNER obrc LOCATION '/opt/obrc_ramfs/psql';
 exit;
 ```
 
@@ -130,6 +131,25 @@ COPY obrc(station_name, measurement)
  );
 ```
 
+# Load data into database with `ramfs` tablespace
+
+```sql
+CREATE UNLOGGED TABLE obrc_ramfs
+(
+  station_name VARCHAR(26),
+  measurement  NUMERIC(3,1)
+)
+TABLESPACE obrc_ramfs_ts;
+
+COPY obrc_ramfs(station_name, measurement)
+ FROM '/opt/obrc_ramfs/measurements_413.txt'
+ WITH
+ (
+  FORMAT CSV,
+  DELIMITER ';'
+ );
+```
+
 # Aggregate 10 billion rows from internal table
 
 ```sql
@@ -139,7 +159,8 @@ SELECT
   ROUND(AVG(measurement),1) AS mean_measurement,
   MAX(measurement) AS max_measurement
  FROM obrc
- GROUP BY station_name;
+ GROUP BY station_name
+ ORDER BY station_name;
 ```
 
 # Aggregate 10 billion rows into one row return from internal table
@@ -164,5 +185,6 @@ SELECT
 ```sql
 psql
 DROP DATABASE obrc;
+DROP TABLESPACE obrc_ramfs_ts;
 DROP USER obrc;
 ```

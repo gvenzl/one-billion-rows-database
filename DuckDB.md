@@ -36,7 +36,8 @@ SELECT station_name,
                 'measurement':'FLOAT'
                }
               )
- GROUP BY station_name;
+ GROUP BY station_name
+ ORDER BY station_name;
 ```
 
 # Aggregate 10 billion rows into one row return
@@ -94,7 +95,8 @@ SELECT station_name,
        ROUND(AVG(measurement),1) AS mean_measurement,
        MAX(measurement) AS max_measurement
  FROM obrc
- GROUP BY station_name;
+ GROUP BY station_name
+ ORDER BY station_name;
 ```
 
 # Aggregate 10 billion rows into one row return from internal table
