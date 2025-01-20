@@ -141,6 +141,8 @@ CREATE UNLOGGED TABLE obrc_ramfs
 )
 TABLESPACE obrc_ramfs_ts;
 
+ALTER TABLE obrc_ramfs set (parallel_workers=128);
+
 COPY obrc_ramfs(station_name, measurement)
  FROM '/opt/obrc_ramfs/measurements_413.txt'
  WITH
